@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crochet Machine Controller</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#17232b;--mute:#5b6b73;--line:#d5dcdf;--accent:#0b6e68;--on:#fff;--warn:#7a4a00;--warnbg:#fff1d6;--bar2:#c3cfd3;--err:#a12626}
+@media (prefers-color-scheme:dark){:root{--bg:#0e171b;--card:#162227;--ink:#e8eff1;--mute:#9fb0b7;--line:#2b3a41;--accent:#3cc4ba;--on:#06211f;--warn:#f0b44c;--warnbg:#3a2c10;--bar2:#3a4a51;--err:#ff8a8a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font:600 28px/1.15 Georgia,"Times New Roman",serif;margin:8px 0 4px}
+h2{font:600 17px/1.3 Georgia,serif;margin:0 0 10px}
+p.sub{margin:0 0 18px;color:var(--mute)}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:14px;color:var(--mute);margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px}
+textarea{font:14px/1.5 Consolas,"Courier New",monospace;min-height:210px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 auto}.row>button{flex:0 0 auto}
+button{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--on);border-radius:6px;padding:9px 14px;cursor:pointer}
+button.alt{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;border:1px solid var(--line);color:var(--mute)}
+.pill.ok{color:var(--accent);border-color:var(--accent)}
+ol{list-style:none;margin:10px 0 0;padding:0;max-height:340px;overflow:auto}
+li{display:grid;grid-template-columns:34px 1fr auto;gap:2px 10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+li .ln{color:var(--mute);font-size:13px;text-align:right}
+li .bar{grid-column:2;height:6px;border-radius:3px;background:var(--accent)}
+li.skip .bar{background:var(--bar2)}
+li.cur{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.tag{font-size:12px;color:var(--mute)}
+.warn{background:var(--warnbg);color:var(--warn);padding:8px 10px;border-radius:6px;font-size:14px;margin-top:10px}
+.err{color:var(--err);font-size:14px;margin-top:8px}
+.prog{height:10px;background:var(--bar2);border-radius:5px;overflow:hidden;margin:12px 0 6px}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+.msg{font-size:14px;color:var(--mute);min-height:21px}
+</style>
+</head>
+<body>
+<main>
+<h1>Crochet Machine Controller</h1>
+<p class="sub">Pick or write a pattern, check what the machine can run, then send it over Wi-Fi.</p>
+
+<section aria-labelledby="h-conn">
+  <h2 id="h-conn">Machine</h2>
+  <div class="row">
+    <div><label for="ip">Machine IP address (shown in Serial Monitor)</label>
+    <input id="ip" inputmode="decimal" placeholder="192.168.1.50" autocomplete="off"></div>
+    <button id="btnConn">Connect</button>
+  </div>
+  <p style="margin:10px 0 0"><span id="pill" class="pill">Not connected</span></p>
+</section>
+
+<section aria-labelledby="h-pat">
+  <h2 id="h-pat">Pattern</h2>
+  <label for="lib">Start from a template</label>
+  <select id="lib"></select>
+  <label for="pat" style="margin-top:10px">Pattern (one instruction per line, # starts a comment)</label>
+  <textarea id="pat" spellcheck="false"></textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="alt" id="btnShare">Copy link</button>
+    <button class="alt" id="btnDl">Download</button>
+    <button class="alt" id="btnLoad">Load file</button>
+    <input type="file" id="file" accept=".txt,.crochet" hidden>
+  </div>
+  <p class="tag" style="margin:8px 0 0">Instructions: CH n, SC n, DC n, ROUND n, TURN, JOIN, PAUSE message. The current build runs CH and PAUSE; the others are checked and sent but skipped until row and round hardware exists.</p>
+</section>
+
+<section aria-labelledby="h-steps">
+  <h2 id="h-steps">Check</h2>
+  <div id="sum"></div>
+  <div id="errs"></div>
+  <ol id="steps"></ol>
+</section>
+
+<section aria-labelledby="h-run">
+  <h2 id="h-run">Run</h2>
+  <div class="row">
+    <button id="btnSend" disabled>Send pattern</button>
+    <button id="btnStart" disabled>Start</button>
+    <button id="btnResume" class="alt" disabled>Resume</button>
+    <button id="btnStop" class="alt" disabled>Stop</button>
+    <button id="btnHome" class="alt" disabled>Home</button>
+  </div>
+  <div class="prog" aria-hidden="true"><i id="pb"></i></div>
+  <div class="msg" id="msg" role="status" aria-live="polite"></div>
+</section>
+</main>
+
+<script>
+const LIB={
+"Chain cord (stem)":"# Plain stem: a chain cord\nCH 40",
+"Leaf":"# Small flat leaf\nCH 12\nTURN\nSC 11\nTURN\nSC 11\nPAUSE Leaf worked. Weave in ends",
+"Rose ruffle strip":"# Flat ruffled strip, rolled by hand into a rose\nCH 61\nTURN\nSC 60\nTURN\nDC 120 # two DC in each stitch makes the ruffle\nTURN\nSC 120\nPAUSE Roll the strip from one end and stitch the base",
+"Sunflower":"# Brown centre, then yellow petal loops\nCH 6\nJOIN\nROUND 12\nROUND 24\nROUND 36\nPAUSE Swap to yellow yarn\nCH 96 # 12 petals of 8 chains each\nPAUSE Attach petals around the centre",
+"Tulip (advanced)":"# 3D cup shape, needs shaping by hand\nCH 6\nJOIN\nROUND 6\nROUND 12\nROUND 18\nROUND 18\nROUND 18\nROUND 12\nROUND 6\nPAUSE Stuff lightly and attach stem"};
+const OPS={CH:1,SC:1,DC:1,ROUND:1,TURN:0,JOIN:0,PAUSE:2};
+const RUNS={CH:1,PAUSE:1};
+const $=id=>document.getElementById(id);
+let steps=[],errors=[],loaded=false,connected=false,curStep=-1;
+
+function parse(txt){
+  steps=[];errors=[];
+  txt.split('\n').forEach((raw,i)=>{
+    const l=raw.split('#')[0].trim(); if(!l)return;
+    const m=l.match(/^(\w+)\s*(.*)$/); const op=m[1].toUpperCase(),arg=m[2].trim();
+    if(!(op in OPS)){errors.push('Line '+(i+1)+': unknown instruction "'+m[1]+'"');return}
+    let n=0;
+    if(OPS[op]===1){n=Number(arg); if(!Number.isInteger(n)||n<1||n>999){errors.push('Line '+(i+1)+': '+op+' needs a whole number from 1 to 999');return}}
+    steps.push({op,n,arg,line:i+1,run:!!RUNS[op]});
+  });
+}
+function render(){
+  parse($('pat').value);
+  const max=Math.max(1,...steps.map(s=>s.n));
+  const total=steps.reduce((a,s)=>a+s.n,0), runnable=steps.filter(s=>s.run).reduce((a,s)=>a+s.n,0), skipped=steps.filter(s=>!s.run).length;
+  const mins=Math.round(runnable*2.5/60);
+  $('sum').textContent=steps.length?steps.length+' steps, '+total+' stitches in total. The current build can run '+runnable+' (about '+mins+' min); '+skipped+' step'+(skipped===1?'':'s')+' will be skipped.':'No steps yet.';
+  $('errs').innerHTML=errors.map(e=>'<div class="err">'+e+'</div>').join('');
+  $('steps').innerHTML=steps.map((s,i)=>'<li class="'+(s.run?'':'skip')+(i===curStep?' cur':'')+'"><span class="ln">'+s.line+'</span><span>'+s.op+(s.op==='PAUSE'?' '+esc(s.arg):s.n?' '+s.n:'')+'</span><span class="tag">'+(s.run?'runs':'needs hardware')+'</span>'+(s.n?'<div class="bar" style="width:'+Math.max(4,s.n/max*100)+'%"></div>':'')+'</li>').join('');
+  buttons();
+}
+function esc(t){return t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function buttons(){
+  const ok=connected&&steps.length&&!errors.length;
+  $('btnSend').disabled=!ok; $('btnStart').disabled=!(ok&&loaded);
+  ['btnStop','btnHome','btnResume'].forEach(b=>$(b).disabled=!connected);
+}
+function base(){let v=$('ip').value.trim(); if(!v)return''; return /^https?:\/\//.test(v)?v:'http://'+v}
+async function call(path,opt){
+  const r=await fetch(base()+path,Object.assign({cache:'no-store'},opt||{}));
+  return r;
+}
+function say(t){$('msg').textContent=t}
+async function connect(){
+  try{localStorage.setItem('ip',$('ip').value)}catch(e){}
+  try{const r=await call('/status'); await r.json(); connected=true; $('pill').textContent='Connected'; $('pill').className='pill ok'; say('Connected to machine.');}
+  catch(e){connected=false; $('pill').textContent='Not connected'; $('pill').className='pill'; say('Cannot reach the machine. Check the IP, that this device is on the same Wi-Fi, and that the page is opened over http or as a local file (not an https site).');}
+  buttons();
+}
+async function send(){
+  const body=steps.map(s=>s.op+(s.op==='PAUSE'?(s.arg?' '+s.arg:''):s.n?' '+s.n:'')).join('\n');
+  try{const r=await call('/program',{method:'POST',headers:{'Content-Type':'text/plain'},body}); say(await r.text()); loaded=r.ok;}catch(e){say('Send failed: '+e.message)}
+  buttons();
+}
+async function cmd(p){try{const r=await call(p); say(await r.text())}catch(e){say('Command failed: '+e.message)}}
+async function poll(){
+  if(!connected)return;
+  try{const s=await (await call('/status')).json();
+    curStep=s.state==='idle'&&s.step===0?-1:s.step;
+    $('pb').style.width=(s.steps?Math.min(100,s.step/s.steps*100):0)+'%';
+    $('btnResume').disabled=s.state!=='paused';
+    say(s.state+(s.steps?' - step '+Math.min(s.step+1,s.steps)+' of '+s.steps:'')+(s.state==='running'?', stitch '+s.done:'')+(s.msg?'. '+s.msg:'')+(s.homed?'':' (not homed)'));
+    render2();
+  }catch(e){connected=false;$('pill').textContent='Connection lost';$('pill').className='pill';buttons()}
+}
+function render2(){document.querySelectorAll('#steps li').forEach((li,i)=>li.classList.toggle('cur',i===curStep))}
+
+$('lib').innerHTML='<option value="">Choose a template</option>'+Object.keys(LIB).map(k=>'<option>'+k+'</option>').join('');
+$('lib').onchange=e=>{if(LIB[e.target.value]){$('pat').value=LIB[e.target.value];loaded=false;render()}};
+$('pat').oninput=()=>{loaded=false;render()};
+$('btnConn').onclick=connect; $('btnSend').onclick=send;
+$('btnStart').onclick=()=>cmd('/start'); $('btnStop').onclick=()=>cmd('/stop');
+$('btnResume').onclick=()=>cmd('/resume'); $('btnHome').onclick=()=>cmd('/home');
+$('btnDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('pat').value],{type:'text/plain'}));a.download='crochet-pattern.txt';a.click()};
+$('btnLoad').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{$('pat').value=t;loaded=false;render()})};
+$('btnShare').onclick=async()=>{
+  const link=location.href.split('#')[0]+'#p='+btoa(unescape(encodeURIComponent($('pat').value)));
+  try{await navigator.clipboard.writeText(link);say('Link copied. It opens this page with the pattern filled in.')}catch(e){prompt('Copy this link:',link)}
+};
+try{$('ip').value=localStorage.getItem('ip')||''}catch(e){}
+const h=location.hash.match(/^#p=(.+)$/);
+try{$('pat').value=h?decodeURIComponent(escape(atob(h[1]))):LIB['Chain cord (stem)']}catch(e){$('pat').value=LIB['Chain cord (stem)']}
+render(); setInterval(poll,1000);
+</script>
+</body>
+</html>

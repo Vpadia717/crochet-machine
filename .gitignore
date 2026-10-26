@@ -1,0 +1,16 @@
+# Secrets and local config
+secrets.h
+*.local
+.env
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build output
+build/
+*.bin
+*.elf
+__pycache__/

@@ -1,0 +1,10 @@
+# Name: Leaf
+# Use: Small flat leaf for flower stems
+# Machine support: CH runs now; SC and TURN need row hardware
+# Assembly: weave in ends, attach to stem by hand
+CH 12
+TURN
+SC 11
+TURN
+SC 11
+PAUSE Leaf worked. Weave in ends

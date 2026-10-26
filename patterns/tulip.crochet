@@ -1,0 +1,14 @@
+# Name: Tulip (advanced)
+# Use: 3D cup-shaped flower head
+# Machine support: needs rotating work holder and controlled shaping; advanced
+# Assembly: stuff lightly and attach stem by hand
+CH 6
+JOIN
+ROUND 6
+ROUND 12
+ROUND 18
+ROUND 18
+ROUND 18
+ROUND 12
+ROUND 6
+PAUSE Stuff lightly and attach stem

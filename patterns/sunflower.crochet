@@ -1,0 +1,12 @@
+# Name: Sunflower
+# Use: Brown centre disc with yellow petal loops
+# Machine support: petal chain runs now; centre rounds need a rotating work holder
+# Assembly: attach petals around the centre by hand
+CH 6
+JOIN
+ROUND 12
+ROUND 24
+ROUND 36
+PAUSE Swap to yellow yarn
+CH 96 # 12 petals of 8 chains each
+PAUSE Attach petals around the centre

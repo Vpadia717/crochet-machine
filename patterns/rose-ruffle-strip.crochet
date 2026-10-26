@@ -1,0 +1,12 @@
+# Name: Rose ruffle strip
+# Use: Flat ruffled strip, rolled by hand into a rose
+# Machine support: foundation chain runs now; SC and DC rows need row hardware
+# Assembly: roll the strip from one end and stitch the base
+CH 61
+TURN
+SC 60
+TURN
+DC 120 # two DC in each stitch makes the ruffle
+TURN
+SC 120
+PAUSE Roll the strip from one end and stitch the base
