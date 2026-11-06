@@ -66,7 +66,7 @@ li.cur{background:color-mix(in srgb,var(--accent) 12%,transparent)}
     <button class="alt" id="btnLoad">Load file</button>
     <input type="file" id="file" accept=".txt,.crochet" hidden>
   </div>
-  <p class="tag" style="margin:8px 0 0">Instructions: CH n, SC n, DC n, ROUND n, TURN, JOIN, PAUSE message. The current build runs CH and PAUSE; the others are checked and sent but skipped until row and round hardware exists.</p>
+  <p class="tag" style="margin:8px 0 0">Instructions: CH, SC, HDC, DC, SLST, INC, MR and ROUND each take a count (for example HDC 6); TURN and JOIN take none; PAUSE takes a message. REPEAT n ... END repeats the lines between them. The current build runs CH and PAUSE; the others are checked and sent but skipped until row and round hardware exists.</p>
 </section>
 
 <section aria-labelledby="h-steps">
@@ -91,27 +91,46 @@ li.cur{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 </main>
 
 <script>
-const LIB={
-"Chain cord (stem)":"# Plain stem: a chain cord\nCH 40",
-"Leaf":"# Small flat leaf\nCH 12\nTURN\nSC 11\nTURN\nSC 11\nPAUSE Leaf worked. Weave in ends",
-"Rose ruffle strip":"# Flat ruffled strip, rolled by hand into a rose\nCH 61\nTURN\nSC 60\nTURN\nDC 120 # two DC in each stitch makes the ruffle\nTURN\nSC 120\nPAUSE Roll the strip from one end and stitch the base",
-"Sunflower":"# Brown centre, then yellow petal loops\nCH 6\nJOIN\nROUND 12\nROUND 24\nROUND 36\nPAUSE Swap to yellow yarn\nCH 96 # 12 petals of 8 chains each\nPAUSE Attach petals around the centre",
-"Tulip (advanced)":"# 3D cup shape, needs shaping by hand\nCH 6\nJOIN\nROUND 6\nROUND 12\nROUND 18\nROUND 18\nROUND 18\nROUND 12\nROUND 6\nPAUSE Stuff lightly and attach stem"};
-const OPS={CH:1,SC:1,DC:1,ROUND:1,TURN:0,JOIN:0,PAUSE:2};
+/*LIB_START*/const LIB={
+ "Bow keychain": "# Name: Bow keychain\n# Use: Small crocheted bow for a keychain or bag charm\n# Source: docs/sources/Keychain.docx (video: https://youtu.be/J5BA1nYeb2Q)\n# Machine support: foundation chain runs now; HDC, SLST and TURN need row hardware\n# Assembly: finish and shape the bow by hand as shown in the video, then attach a keyring\nCH 56\nREPEAT 4 # repeat the row 4 times\nHDC 6\nSLST 6\nHDC 12\nSLST 6\nHDC 12\nSLST 6\nHDC 6\nTURN\nEND\nPAUSE Fasten off. Shape the bow by hand and attach the keyring",
+ "Chain cord (stem)": "# Name: Chain cord (stem)\n# Use: Flower stem or simple cord\n# Machine support: full (CH only) on the current build\n# Assembly: none. Cut and fasten off the yarn.\nCH 40",
+ "Leaf": "# Name: Leaf\n# Use: Small flat leaf for flower stems\n# Machine support: CH runs now; SC and TURN need row hardware\n# Assembly: weave in ends, attach to stem by hand\nCH 12\nTURN\nSC 11\nTURN\nSC 11\nPAUSE Leaf worked. Weave in ends",
+ "Rose ruffle strip": "# Name: Rose ruffle strip\n# Use: Flat ruffled strip, rolled by hand into a rose\n# Machine support: foundation chain runs now; SC and DC rows need row hardware\n# Assembly: roll the strip from one end and stitch the base\nCH 61\nTURN\nSC 60\nTURN\nDC 120 # two DC in each stitch makes the ruffle\nTURN\nSC 120\nPAUSE Roll the strip from one end and stitch the base",
+ "Star keychain": "# Name: Star keychain\n# Use: Small stuffed star with a stitched face, for a keychain or bag charm\n# Source: docs/sources/Keychain.docx (video: https://youtu.be/jY7pYmuqEeQ)\n# Machine support: needs a rotating work holder (rounds from a magic ring); not runnable yet\n# Assembly: sew the two pieces together by hand, stuff, then embroider the face\n#\n# Rounds R1 to R4 follow the source exactly.\n# R5 in the source reads: (hdc, dc, hdc, dc) slst in next 3 sts [sc, hdc, dc, hdc, sc],\n# slst in next 3 sts * 4. This file reads it as one first point, then four repeats of\n# (slst 3, point), then a final slst 3. That gives 5 points and uses all 20 stitches\n# (1 + 4 x (3 + 1) + 3 = 20). Check this reading against the video before relying on it.\nREPEAT 2 # make 2 star pieces\nMR 5 # R1: magic ring, 5 sc\nREPEAT 5 # R2: increase in every stitch (10)\nINC 1\nEND\nREPEAT 5 # R3: (sc, inc) x 5 (15)\nSC 1\nINC 1\nEND\nREPEAT 5 # R4: (2 sc, inc) x 5 (20)\nSC 2\nINC 1\nEND\nHDC 1 # R5: first point\nDC 1\nHDC 1\nDC 1\nREPEAT 4 # R5: four more points\nSLST 3\nSC 1\nHDC 1\nDC 1\nHDC 1\nSC 1\nEND\nSLST 3\nPAUSE Fasten off this star piece\nEND\nPAUSE Sew both stars together with wrong sides facing, leaving a gap\nPAUSE Fill with stuffing and continue sewing the gap closed\nPAUSE Make the eyes and smile with thread and sew them on",
+ "Sunflower": "# Name: Sunflower\n# Use: Brown centre disc with yellow petal loops\n# Machine support: petal chain runs now; centre rounds need a rotating work holder\n# Assembly: attach petals around the centre by hand\nCH 6\nJOIN\nROUND 12\nROUND 24\nROUND 36\nPAUSE Swap to yellow yarn\nCH 96 # 12 petals of 8 chains each\nPAUSE Attach petals around the centre",
+ "Tulip (advanced)": "# Name: Tulip (advanced)\n# Use: 3D cup-shaped flower head\n# Machine support: needs rotating work holder and controlled shaping; advanced\n# Assembly: stuff lightly and attach stem by hand\nCH 6\nJOIN\nROUND 6\nROUND 12\nROUND 18\nROUND 18\nROUND 18\nROUND 12\nROUND 6\nPAUSE Stuff lightly and attach stem"
+};/*LIB_END*/
+const OPS={CH:1,SC:1,HDC:1,DC:1,SLST:1,INC:1,MR:1,ROUND:1,TURN:0,JOIN:0,PAUSE:2,REPEAT:1,END:0};
 const RUNS={CH:1,PAUSE:1};
+const MAX_STEPS=200;
 const $=id=>document.getElementById(id);
 let steps=[],errors=[],loaded=false,connected=false,curStep=-1;
 
 function parse(txt){
   steps=[];errors=[];
+  const toks=[];
   txt.split('\n').forEach((raw,i)=>{
     const l=raw.split('#')[0].trim(); if(!l)return;
     const m=l.match(/^(\w+)\s*(.*)$/); const op=m[1].toUpperCase(),arg=m[2].trim();
     if(!(op in OPS)){errors.push('Line '+(i+1)+': unknown instruction "'+m[1]+'"');return}
     let n=0;
-    if(OPS[op]===1){n=Number(arg); if(!Number.isInteger(n)||n<1||n>999){errors.push('Line '+(i+1)+': '+op+' needs a whole number from 1 to 999');return}}
-    steps.push({op,n,arg,line:i+1,run:!!RUNS[op]});
+    if(OPS[op]===1){n=Number(arg); if(!/^\d+$/.test(arg)||n<1||n>999){errors.push('Line '+(i+1)+': '+op+' needs a whole number from 1 to 999');return}}
+    toks.push({op,n,arg,line:i+1});
   });
+  const stack=[];let cur=[];
+  for(const t of toks){
+    if(t.op==='REPEAT'){stack.push({n:t.n,parent:cur,line:t.line});cur=[]}
+    else if(t.op==='END'){
+      if(!stack.length){errors.push('Line '+t.line+': END without REPEAT');continue}
+      const f=stack.pop();
+      if(f.parent.length+cur.length*f.n>5000){errors.push('Line '+t.line+': repeat expands to too many steps');cur=[];break}
+      let body=[];for(let k=0;k<f.n;k++)body=body.concat(cur);
+      cur=f.parent.concat(body);
+    } else cur.push(t);
+  }
+  if(stack.length)errors.push('Line '+stack[stack.length-1].line+': REPEAT without END');
+  steps=cur.map(t=>({op:t.op,n:t.n,arg:t.arg,line:t.line,run:!!RUNS[t.op]}));
+  if(steps.length>MAX_STEPS)errors.push('Pattern expands to '+steps.length+' steps; the machine holds at most '+MAX_STEPS);
 }
 function render(){
   parse($('pat').value);

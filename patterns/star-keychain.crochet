@@ -1,0 +1,42 @@
+# Name: Star keychain
+# Use: Small stuffed star with a stitched face, for a keychain or bag charm
+# Source: docs/sources/Keychain.docx (video: https://youtu.be/jY7pYmuqEeQ)
+# Machine support: needs a rotating work holder (rounds from a magic ring); not runnable yet
+# Assembly: sew the two pieces together by hand, stuff, then embroider the face
+#
+# Rounds R1 to R4 follow the source exactly.
+# R5 in the source reads: (hdc, dc, hdc, dc) slst in next 3 sts [sc, hdc, dc, hdc, sc],
+# slst in next 3 sts * 4. This file reads it as one first point, then four repeats of
+# (slst 3, point), then a final slst 3. That gives 5 points and uses all 20 stitches
+# (1 + 4 x (3 + 1) + 3 = 20). Check this reading against the video before relying on it.
+REPEAT 2 # make 2 star pieces
+MR 5 # R1: magic ring, 5 sc
+REPEAT 5 # R2: increase in every stitch (10)
+INC 1
+END
+REPEAT 5 # R3: (sc, inc) x 5 (15)
+SC 1
+INC 1
+END
+REPEAT 5 # R4: (2 sc, inc) x 5 (20)
+SC 2
+INC 1
+END
+HDC 1 # R5: first point
+DC 1
+HDC 1
+DC 1
+REPEAT 4 # R5: four more points
+SLST 3
+SC 1
+HDC 1
+DC 1
+HDC 1
+SC 1
+END
+SLST 3
+PAUSE Fasten off this star piece
+END
+PAUSE Sew both stars together with wrong sides facing, leaving a gap
+PAUSE Fill with stuffing and continue sewing the gap closed
+PAUSE Make the eyes and smile with thread and sew them on

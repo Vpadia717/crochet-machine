@@ -7,13 +7,39 @@ Examples:
 """
 import argparse, json, re, sys, time, urllib.request, urllib.error
 
-OPS = {"CH": 1, "SC": 1, "DC": 1, "ROUND": 1, "TURN": 0, "JOIN": 0, "PAUSE": 2}  # 1 = needs count, 2 = text
+OPS = {"CH": 1, "SC": 1, "HDC": 1, "DC": 1, "SLST": 1, "INC": 1, "MR": 1, "ROUND": 1,
+       "TURN": 0, "JOIN": 0, "PAUSE": 2, "REPEAT": 1, "END": 0}  # 1 = needs count, 0 = none, 2 = text
+MAX_STEPS = 200  # the firmware stores at most 200 steps
 RUNS = {"CH", "PAUSE"}  # executed by the current hardware build
 SECONDS_PER_STITCH = 2.5
 
 
+def expand(tokens, errors):
+    """Expand REPEAT n ... END blocks (nesting allowed) into a flat step list."""
+    stack, cur = [], []
+    for t in tokens:
+        op, n, arg, no = t
+        if op == "REPEAT":
+            stack.append((n, cur, no))
+            cur = []
+        elif op == "END":
+            if not stack:
+                errors.append(f"Line {no}: END without REPEAT")
+                continue
+            count, parent, _ = stack.pop()
+            if len(parent) + len(cur) * count > 5000:
+                errors.append(f"Line {no}: repeat expands to too many steps")
+                return []
+            cur = parent + cur * count
+        else:
+            cur.append(t)
+    if stack:
+        errors.append(f"Line {stack[-1][2]}: REPEAT without END")
+    return cur
+
+
 def parse(path):
-    steps, errors = [], []
+    tokens, errors = [], []
     with open(path, encoding="utf-8") as f:
         for no, raw in enumerate(f, 1):
             line = raw.split("#")[0].strip()
@@ -30,8 +56,11 @@ def parse(path):
                     errors.append(f"Line {no}: {op} needs a whole number from 1 to 999")
                     continue
                 n = int(arg)
-            steps.append((op, n, arg))
-    return steps, errors
+            tokens.append((op, n, arg, no))
+    flat = expand(tokens, errors)
+    if len(flat) > MAX_STEPS:
+        errors.append(f"Pattern expands to {len(flat)} steps; the machine holds at most {MAX_STEPS}")
+    return [(op, n, arg) for op, n, arg, _ in flat], errors
 
 
 def summary(steps):

@@ -1,0 +1,17 @@
+# Name: Bow keychain
+# Use: Small crocheted bow for a keychain or bag charm
+# Source: docs/sources/Keychain.docx (video: https://youtu.be/J5BA1nYeb2Q)
+# Machine support: foundation chain runs now; HDC, SLST and TURN need row hardware
+# Assembly: finish and shape the bow by hand as shown in the video, then attach a keyring
+CH 56
+REPEAT 4 # repeat the row 4 times
+HDC 6
+SLST 6
+HDC 12
+SLST 6
+HDC 12
+SLST 6
+HDC 6
+TURN
+END
+PAUSE Fasten off. Shape the bow by hand and attach the keyring

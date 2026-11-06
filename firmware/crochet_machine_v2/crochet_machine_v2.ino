@@ -1,6 +1,6 @@
 // Crochet machine firmware v2 - pattern upload over Wi-Fi (ESP32)
 // Libraries: AccelStepper, ESP32Servo. Board: ESP32 Dev Module.
-// Runs CH (chain) and PAUSE steps. Other stitch types (SC, DC, ROUND, TURN, JOIN)
+// Runs CH (chain) and PAUSE steps. Other stitch types (SC, HDC, DC, SLST, INC, MR, ROUND, TURN, JOIN)
 // are accepted but skipped until row/round hardware is added.
 
 #include <WiFi.h>
